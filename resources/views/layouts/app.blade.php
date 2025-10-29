@@ -7,11 +7,8 @@
     <title>SocialX</title>
 </head>
 <body class="antialiased">
-    {{-- Main navigation bar --}}
+    {{-- Updated include: layouts.navigation --}}
     @include('layouts.navigation')
-
-    {{-- Optional nav links component --}}
-    @include('components.nav-links')
 
     <main>
         @yield('content')

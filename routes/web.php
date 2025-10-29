@@ -16,6 +16,11 @@ require __DIR__ . '/auth.php';
 // 👇 Protected routes (only accessible when logged in)
 Route::middleware('auth')->group(function () {
 
+    // ---- DASHBOARD ----
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+
     // ---- POSTS ----
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
@@ -30,13 +35,4 @@ Route::middleware('auth')->group(function () {
 
     // ---- COMMENTS ----
     Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
-
-    // ---- DASHBOARD ----
-    Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-});
-
-
 });

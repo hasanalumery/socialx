@@ -5,12 +5,12 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
-                        <img src="{{ asset('logo.png') }}" class="h-9 w-auto" alt="Logo">
+                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                <div class="hidden space-x-8 sm:ml-10 sm:flex">
                     <a href="{{ route('dashboard') }}" class="text-gray-700 dark:text-gray-200 px-3 py-2 rounded-md">
                         Dashboard
                     </a>
@@ -34,6 +34,7 @@
                             Profile
                         </a>
 
+                        <!-- Logout -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="w-full text-left block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
