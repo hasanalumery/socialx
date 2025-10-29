@@ -32,8 +32,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
 
     // ---- DASHBOARD ----
-Route::get('/dashboard', function () {
-    return view('dashboard');  // Make sure this file exists: resources/views/dashboard.blade.php
-})->middleware('auth')->name('dashboard');
+    Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+});
+
 
 });
