@@ -1,36 +1,48 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Post;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Like;
 
 class PostController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth')->only(['store','like']);
+    }
+
+    // store a new post
     public function store(Request $request)
     {
-        // 1️⃣ Validate input first
         $request->validate([
-            'content' => 'required|string|max:255',
-            'image'   => 'nullable|image|max:2048', // optional image validation
+            'content' => 'required|string|max:1000',
         ]);
 
-        // 2️⃣ Create the post
-        $post = Post::create([
-            'user_id' => Auth::id(),
+        $post = auth()->user()->posts()->create([
             'content' => $request->input('content'),
         ]);
 
-        // 3️⃣ If an image is uploaded, store it and attach it to the post
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('posts', 'public');
-            $post->media()->create([
-                'path' => 'storage/' . $path,
-            ]);
+        return redirect()->back()->with('status', 'Post published.');
+    }
+
+    // toggle like/unlike
+    public function like(Post $post)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return redirect()->route('login');
         }
 
-        // 4️⃣ Redirect back
-        return redirect()->route('home');
+        $existing = $post->likes()->where('user_id', $user->id)->first();
+        if ($existing) {
+            $existing->delete();
+            $message = 'Unliked';
+        } else {
+            $post->likes()->create(['user_id' => $user->id]);
+            $message = 'Liked';
+        }
+
+        return redirect()->back()->with('status', $message);
     }
 }

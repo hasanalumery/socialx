@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,29 +8,22 @@ class Post extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'content'];
+    protected $fillable = ['user_id','content'];
 
-    // Each post belongs to a user
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Each post can have many comments
-    public function comments()
-    {
-        return $this->hasMany(Comment::class);
-    }
-
-    // Each post can have many likes
     public function likes()
     {
         return $this->hasMany(Like::class);
     }
 
-    // Each post can have multiple media items
-    public function media()
+    // helper to check liked by a user id
+    public function isLikedBy($userId): bool
     {
-        return $this->hasMany(Media::class);
+        if (!$userId) return false;
+        return $this->likes()->where('user_id', $userId)->exists();
     }
 }

@@ -1,18 +1,14 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Post; // assuming you already have a Post model
+use App\Models\Post;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        // Fetch all posts, newest first
-        $posts = Post::with('user')->latest()->get();
-
-        // Return them to the view
+        // eager load user + likes; paginate for production readiness
+        $posts = Post::with(['user','likes'])->latest()->paginate(10);
         return view('home', compact('posts'));
     }
 }
