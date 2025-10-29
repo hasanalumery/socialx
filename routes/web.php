@@ -1,22 +1,39 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FeedController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\LikeController;
+use App\Http\Controllers\FollowController;
+use App\Http\Controllers\CommentController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// 👇 Public feed / homepage
+Route::get('/', [FeedController::class, 'index'])->name('home');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// 👇 Authentication routes (from Laravel Breeze or Jetstream)
+require __DIR__ . '/auth.php';
 
+// 👇 Protected routes (only accessible when logged in)
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::get('/feed', [FeedController::class, 'index'])->middleware('auth')->name('feed');
+
+    // ---- POSTS ----
+    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
+    Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+
+    // ---- LIKES ----
+    Route::post('/posts/{post}/like', [LikeController::class, 'toggle'])->name('posts.like');
+
+    // ---- FOLLOWS ----
+    Route::post('/users/{user}/follow', [FollowController::class, 'follow'])->name('user.follow');
+    Route::delete('/users/{user}/follow', [FollowController::class, 'unfollow'])->name('user.unfollow');
+
+    // ---- COMMENTS ----
+    Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
+
+    // ---- DASHBOARD ----
+Route::get('/dashboard', function () {
+    return view('dashboard');  // Make sure this file exists: resources/views/dashboard.blade.php
+})->middleware('auth')->name('dashboard');
 
 });
-
-require __DIR__.'/auth.php';

@@ -22,6 +22,7 @@ class FollowController extends Controller
     public function unfollow(User $user)
     {
         auth()->user()->following()->detach($user->id);
+
         return response()->json(['status' => 'unfollowed']);
     }
 }

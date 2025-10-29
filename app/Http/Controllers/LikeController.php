@@ -2,29 +2,46 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Post;
-use App\Models\Like;
 
 class LikeController extends Controller
 {
-    public function toggle($postId)
+    public function like(Post $post)
     {
-        $post = Post::findOrFail($postId);
+        $user = auth()->user();
 
-        $like = Like::where('post_id', $postId)
-            ->where('user_id', auth()->id())
-            ->first();
-
-        if ($like) {
-            $like->delete(); // unlike
-        } else {
-            Like::create([
-                'post_id' => $postId,
-                'user_id' => auth()->id(),
-            ]);
+        if ($post->user_id === $user->id) {
+            return response()->json(['error' => 'You cannot like your own post'], 400);
         }
 
-        return back();
+        if (! $post->likes()->where('user_id', $user->id)->exists()) {
+            $post->likes()->create(['user_id' => $user->id]);
+        }
+
+        return response()->json(['status' => 'liked']);
+    }
+
+    public function unlike(Post $post)
+    {
+        $user = auth()->user();
+
+        $post->likes()->where('user_id', $user->id)->delete();
+
+        return response()->json(['status' => 'unliked']);
+    }
+
+    public function toggle(Post $post)
+    {
+        $user = auth()->user();
+
+        $existing = $post->likes()->where('user_id', $user->id)->first();
+
+        if ($existing) {
+            $existing->delete();
+            return response()->json(['status' => 'unliked']);
+        } else {
+            $post->likes()->create(['user_id' => $user->id]);
+            return response()->json(['status' => 'liked']);
+        }
     }
 }
