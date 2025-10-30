@@ -1,4 +1,3 @@
-{{-- resources/views/home.blade.php --}}
 @extends('layouts.app')
 
 @section('title', 'Home — SocialX')
@@ -34,43 +33,41 @@
     @forelse ($posts as $post)
     <div class="bg-gray-800 rounded-2xl p-4 shadow space-y-3">
 
-        {{-- Post Header --}}
+        {{-- Header --}}
         <div class="flex items-center gap-2 text-sm text-gray-400">
             <span class="font-semibold text-white">{{ $post->user?->name ?? 'Unknown' }}</span>
-            <span>· {{ $post->created_at?->diffForHumans() ?? '' }}</span>
+            <span>· {{ $post->created_at->diffForHumans() }}</span>
         </div>
 
-        {{-- Post Content --}}
+        {{-- Content --}}
         <div class="text-gray-200">{{ $post->content }}</div>
 
-        {{-- Post Media --}}
+        {{-- Media --}}
         @if($post->media)
-            <img src="{{ asset('storage/' . $post->media) }}"
-                class="rounded-xl mt-2 w-full max-h-[600px] object-cover">
+        <img src="{{ asset('storage/' . $post->media) }}" class="rounded-xl mt-2 w-full max-h-[600px] object-cover">
         @endif
 
         {{-- Likes --}}
-        <div class="flex items-center gap-3 mt-2">
+        <div class="flex items-center gap-3">
             @auth
-            <form action="{{ route('posts.like', $post->id) }}" method="POST">
+            <form action="{{ route('posts.like', $post->id) }}" method="POST" class="inline">
                 @csrf
                 <button type="submit" class="text-sm text-blue-500 font-medium">
-                    {{ $post->likes?->count() ?? 0 }}
+                    {{ $post->likes->count() }} 
                     {{ method_exists($post, 'isLikedBy') && $post->isLikedBy(auth()->id()) ? 'Unlike' : 'Like' }}
                 </button>
             </form>
             @else
-            <span class="text-sm text-gray-500">{{ $post->likes?->count() ?? 0 }} likes</span>
+            <span class="text-sm text-gray-500">{{ $post->likes->count() }} likes</span>
             @endauth
         </div>
 
         {{-- Comments --}}
         <div class="mt-2 space-y-1">
-            @foreach($post->comments ?? [] as $comment)
-                <p class="text-sm text-gray-400">
-                    <span class="font-semibold">{{ $comment->user?->name ?? 'Unknown' }}</span>
-                    {{ $comment->body ?? '' }}
-                </p>
+            @foreach($post->comments as $comment)
+            <p class="text-sm text-gray-400">
+                <span class="font-semibold">{{ $comment->user?->name ?? 'Unknown' }}</span> {{ $comment->body }}
+            </p>
             @endforeach
 
             @auth
@@ -82,7 +79,6 @@
             </form>
             @endauth
         </div>
-
     </div>
     @empty
     <div class="text-center text-gray-500 mt-10">No posts yet — be the first to post.</div>

@@ -7,11 +7,15 @@ use App\Models\Post;
 
 class PostController extends Controller
 {
+    // Apply auth middleware to store and delete
     public function __construct()
     {
-        $this->middleware('auth')->only(['store', 'like']);
+        $this->middleware('auth')->only(['store', 'destroy', 'like']);
     }
 
+    /**
+     * Store a new post
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -19,7 +23,9 @@ class PostController extends Controller
             'media' => 'nullable|file|mimes:jpg,jpeg,png,gif,mp4,webm|max:20480',
         ]);
 
-        $post = auth()->user()->posts()->create([
+        $user = $request->user();
+
+        $post = $user->posts()->create([
             'content' => $request->input('content'),
         ]);
 
@@ -31,22 +37,45 @@ class PostController extends Controller
         return redirect()->back()->with('status', 'Post published.');
     }
 
+    /**
+     * Show a single post
+     */
+    public function show(Post $post)
+    {
+        $post->load(['user', 'likes', 'comments.user']);
+        return view('posts.show', compact('post'));
+    }
+
+    /**
+     * Delete a post
+     */
+    public function destroy(Post $post)
+    {
+        // Simple owner check
+        if ($post->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $post->delete();
+        return redirect()->back()->with('status', 'Post deleted.');
+    }
+
+    /**
+     * Toggle like/unlike
+     */
     public function like(Post $post)
     {
         $user = auth()->user();
-
         if (!$user) return redirect()->route('login');
 
         $existing = $post->likes()->where('user_id', $user->id)->first();
 
         if ($existing) {
             $existing->delete();
-            $message = 'Unliked';
         } else {
             $post->likes()->create(['user_id' => $user->id]);
-            $message = 'Liked';
         }
 
-        return redirect()->back()->with('status', $message);
+        return redirect()->back();
     }
 }
