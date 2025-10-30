@@ -8,8 +8,7 @@ class Post extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id','content'];
-
+    // Relationships
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -20,10 +19,14 @@ class Post extends Model
         return $this->hasMany(Like::class);
     }
 
-    // helper to check liked by a user id
-    public function isLikedBy($userId): bool
+    public function comments()
     {
-        if (!$userId) return false;
-        return $this->likes()->where('user_id', $userId)->exists();
+        return $this->hasMany(Comment::class);
+    }
+
+    // ✅ Method for Blade to check if a post is liked by a user
+    public function isLikedBy($userId)
+    {
+        return $this->likes->contains('user_id', $userId);
     }
 }

@@ -12,28 +12,32 @@ class FeedController extends Controller
     {
         $userId = auth()->id();
 
-        // Base query for posts (all posts)
-        $postsQuery = Post::with(['user', 'media', 'comments', 'likes'])->latest();
+        $postsQuery = Post::with(['user', 'likes', 'comments.user'])
+                          ->latest();
 
-        // If logged in, filter posts to followed users + self
         if ($userId) {
             $followedIds = DB::table('follows')
-                ->where('follower_id', $userId)
-                ->pluck('followed_id')
-                ->toArray();
+                             ->where('follower_id', $userId)
+                             ->pluck('followed_id')
+                             ->toArray();
 
-            // If the user follows anyone, filter posts
             if (!empty($followedIds)) {
                 $postsQuery->whereIn('user_id', $followedIds)
                            ->orWhere('user_id', $userId);
             }
-            // else fallback: show all posts (no filter)
         }
 
-        // Paginate posts (unified)
         $posts = $postsQuery->paginate(10);
 
-        // Render home.blade.php with posts
         return view('home', compact('posts'));
+    }
+
+    public function explore()
+    {
+        $posts = Post::with(['user', 'likes', 'comments.user'])
+                     ->latest()
+                     ->paginate(10);
+
+        return view('explore', compact('posts'));
     }
 }
