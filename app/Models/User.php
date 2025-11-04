@@ -69,6 +69,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Comment::class);
     }
+    
 
     /**
      * Users that this user is following.
