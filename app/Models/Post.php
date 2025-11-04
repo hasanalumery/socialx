@@ -90,4 +90,9 @@ class Post extends Model
         $this->likes()->create(['user_id' => $user->id]);
         return true;
     }
+
+    public function isLikedByUser($userId)
+{
+    return $this->likes->contains('user_id', $userId);
+}
 }

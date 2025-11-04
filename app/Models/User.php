@@ -17,6 +17,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'profile_picture',
+        'bio',
     ];
 
     /**
@@ -28,15 +30,12 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be cast.
+     * The attributes that should be cast to native types.
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
 
     /**
      * One-to-one relationship with Profile.
@@ -69,18 +68,30 @@ class User extends Authenticatable
     {
         return $this->hasMany(Comment::class);
     }
-    
 
     /**
      * Users that this user is following.
      */
     public function following()
-{
-    return $this->belongsToMany(User::class, 'follows', 'follower_id', 'following_id')->withTimestamps();
-}
+    {
+        return $this->belongsToMany(
+            User::class,
+            'follows',
+            'follower_id',
+            'following_id'
+        )->withTimestamps();
+    }
 
-public function followers()
-{
-    return $this->belongsToMany(User::class, 'follows', 'following_id', 'follower_id')->withTimestamps();
-}
+    /**
+     * Users that follow this user.
+     */
+    public function followers()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'follows',
+            'following_id',
+            'follower_id'
+        )->withTimestamps();
+    }
 }

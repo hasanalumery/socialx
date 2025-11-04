@@ -3,18 +3,21 @@
 @section('title', $user->name . ' — Profile')
 
 @section('content')
-<div class="space-y-6">
+<div class="max-w-3xl mx-auto space-y-6">
 
-    <!-- Profile Header -->
-    <div class="flex items-center gap-4 bg-gray-800 p-4 rounded-2xl">
-        <div class="w-16 h-16 bg-gray-700 rounded-full"></div>
+    {{-- Profile Header --}}
+    <div class="flex items-center gap-4 bg-gray-800 p-4 rounded-2xl shadow-md">
+        <img src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : 'https://via.placeholder.com/80' }}" 
+             alt="Profile Picture" 
+             class="w-20 h-20 rounded-full object-cover">
         <div>
-            <h2 class="text-xl font-bold">{{ $user->name }}</h2>
+            <h2 class="text-xl font-semibold text-white">{{ $user->name }}</h2>
+            <p class="text-gray-400">{{ $user->bio }}</p>
             <p class="text-sm text-gray-400">{{ $user->posts->count() }} posts</p>
         </div>
     </div>
 
-    <!-- User Posts -->
+    {{-- User Posts --}}
     @forelse($posts as $post)
     <div class="bg-gray-800 rounded-2xl p-4 shadow space-y-3">
 
@@ -29,7 +32,7 @@
 
         {{-- Post Media --}}
         @if($post->media)
-            <img src="{{ asset('storage/' . $post->media) }}" class="rounded-xl mt-2 w-full max-h-[600px] object-cover">
+            <img src="{{ asset('storage/' . $post->media) }}" class="rounded-2xl mt-2 w-full max-h-[600px] object-cover">
         @endif
 
         {{-- Likes --}}
@@ -67,9 +70,11 @@
 
     </div>
     @empty
-        <p class="text-gray-400">This user hasn't posted yet.</p>
+        <p class="text-gray-400 text-center">This user hasn't posted yet.</p>
     @endforelse
 
+    {{-- Pagination --}}
     {{ $posts->links('pagination::tailwind') }}
+
 </div>
 @endsection

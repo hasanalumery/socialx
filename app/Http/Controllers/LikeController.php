@@ -26,6 +26,34 @@ class LikeController extends Controller
         return back()->with('status', 'Post liked.');
     }
 
+    public function toggle(Post $post)
+{
+    $user = auth()->user();
+    if (!$user) {
+        return response()->json(['error' => 'Unauthenticated'], 401);
+    }
+
+    $existing = $post->likes()->where('user_id', $user->id)->first();
+
+    if ($existing) {
+        $existing->delete();
+        $status = 'unliked';
+    } else {
+        $post->likes()->create(['user_id' => $user->id]);
+        $status = 'liked';
+    }
+
+    // return JSON including updated count
+    if (request()->wantsJson() || request()->ajax()) {
+        return response()->json([
+            'status' => $status,
+            'likes_count' => $post->likes()->count(),
+        ]);
+    }
+
+    return redirect()->back();
+}
+
     // Unlike a post
     public function destroy(Post $post)
     {
