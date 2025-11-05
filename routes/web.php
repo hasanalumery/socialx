@@ -10,39 +10,36 @@ use App\Http\Controllers\{
     CommentController
 };
 
-// ------------------------
-// Public Routes
-// ------------------------
-
-// Homepage & Explore
+// Public routes
 Route::get('/', [FeedController::class, 'index'])->name('home');
 Route::get('/explore', [FeedController::class, 'explore'])->name('explore');
 
-// Authentication routes (Breeze/Jetstream)
+// Auth routes (Breeze)
 require __DIR__ . '/auth.php';
 
-// ------------------------
-// Protected Routes (require login)
-// ------------------------
+// Protected routes (require auth)
 Route::middleware('auth')->group(function () {
 
     // Dashboard
     Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
 
-    // My profile routes
-    Route::get('/profile', function() {
+    // My profile (redirect to public profile.show of the current user)
+    Route::get('/profile', function () {
         return redirect()->route('profile.show', auth()->user());
     })->name('profile.self');
 
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-   Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
-
+    // Edit/update/delete profile
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');  
+    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Posts & interactions
-    Route::resource('posts', PostController::class)->except(['create', 'edit']); // store, show, destroy
+    // Posts: store, show, destroy (exclude create/edit)
+    Route::resource('posts', PostController::class)->except(['create', 'edit']);
+
+    // Like toggle (POST)
     Route::post('/posts/{post}/like', [LikeController::class, 'toggle'])->name('posts.like');
-    Route::delete('/posts/{post}/like', [LikeController::class, 'destroy'])->name('posts.unlike');
+
+    // Comments - store
     Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
 
     // Follows
@@ -50,8 +47,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/users/{user}/follow', [FollowController::class, 'unfollow'])->name('user.unfollow');
 });
 
-// ------------------------
-// Public Profile Viewing
-// ------------------------
-// IMPORTANT: place this AFTER /profile and /profile/edit routes to prevent conflicts
+Route::post('/posts/{post}/comments', [CommentController::class, 'store'])
+     ->middleware('auth')
+     ->name('comments.store');
+
+// Public profile viewing (must be after /profile routes)
 Route::get('/profile/{user}', [ProfileController::class, 'show'])->name('profile.show');

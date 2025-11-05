@@ -13,16 +13,32 @@ class CommentController extends Controller
         $this->middleware('auth');
     }
 
+    /**
+     * Store a comment for a given post.
+     * Returns JSON for AJAX requests or redirects back for normal requests.
+     */
     public function store(Request $request, Post $post)
     {
         $data = $request->validate([
             'body' => 'required|string|max:1000',
         ]);
 
-        $post->comments()->create([
+        $comment = $post->comments()->create([
             'user_id' => Auth::id(),
             'body'    => $data['body'],
         ]);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => 'ok',
+                'comment' => [
+                    'id' => $comment->id,
+                    'user_name' => $comment->user->name,
+                    'body' => $comment->body,
+                    'created_at' => $comment->created_at->diffForHumans(),
+                ],
+            ]);
+        }
 
         return back()->with('status', 'Comment added.');
     }
