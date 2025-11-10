@@ -42,4 +42,17 @@ class CommentController extends Controller
 
         return back()->with('status', 'Comment added.');
     }
+
+    public function like(Comment $comment)
+{
+    $user = auth()->user();
+
+    $comment->likes()->toggle($user->id);
+
+    return response()->json([
+        'liked' => $comment->likes()->where('user_id', $user->id)->exists(),
+        'likes_count' => $comment->likes()->count(),
+    ]);
+}
+
 }

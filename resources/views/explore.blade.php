@@ -10,12 +10,17 @@
 
         {{-- Header --}}
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center text-white font-bold">
-                {{ strtoupper(substr($post->user?->name ?? 'U',0,1)) }}
-            </div>
-            <div>
-                <p class="text-sm font-semibold text-white">{{ $post->user?->name ?? 'Unknown' }}</p>
-                <p class="text-xs text-gray-400">{{ $post->created_at->diffForHumans() }}</p>
+            @if($post->user->profile_picture)
+                <img src="{{ asset('storage/'.$post->user->profile_picture) }}" class="w-10 h-10 rounded-full object-cover">
+            @else
+                <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white font-semibold">
+                    {{ strtoupper(substr($post->user?->name ?? 'U', 0, 1)) }}
+                </div>
+            @endif
+
+            <div class="text-sm text-gray-400">
+                <div class="font-semibold text-white">{{ $post->user?->name ?? 'Unknown' }}</div>
+                <div class="text-xs">{{ $post->created_at->diffForHumans() }}</div>
             </div>
         </div>
 
