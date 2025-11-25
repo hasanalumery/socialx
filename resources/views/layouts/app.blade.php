@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title', config('app.name', 'SocialX'))</title>
@@ -40,7 +40,7 @@
 
                             <div x-show="open" @click.away="open = false"
                                 class="absolute right-0 mt-2 w-40 bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5">
-                                <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm hover:bg-gray-700">My profile</a>
+                                <a href="{{ route('profile.show', auth()->user()) }}" class="block px-4 py-2 text-sm hover:bg-gray-700">My profile</a>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-700">Logout</button>
@@ -87,72 +87,15 @@
     <footer class="max-w-3xl mx-auto px-4 pb-8 text-sm text-gray-400">
         <div class="border-t border-gray-800 pt-4 mt-8 flex justify-between items-center">
             <span>© {{ date('Y') }} {{ config('app.name', 'SocialX') }}</span>
-            <span class="text-blue-400">✨ Made with love ✨</span>
+            <span class="text-blue-400">Made by Ika Studio</span>
         </div>
     </footer>
 
     {{-- AlpineJS --}}
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
-    {{-- Like / Comment JS --}}
-    <script>
-        document.querySelectorAll('.like-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const postId = btn.dataset.postId;
-                fetch(`/posts/${postId}/like`, { 
-                    method: 'POST', 
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } 
-                })
-                .then(res => res.json())
-                .then(data => {
-                    btn.querySelector('.like-text').textContent = data.status === 'liked' ? 'Liked' : 'Like';
-                    if(data.status === 'liked'){
-                        btn.classList.add('bg-blue-500','text-white','scale-105');
-                        setTimeout(()=> btn.classList.remove('scale-105'),150);
-                    } else {
-                        btn.classList.remove('bg-blue-500','text-white');
-                    }
-                });
-            });
-        });
-
-        document.querySelectorAll('.comment-toggle-btn').forEach(btn=>{
-            btn.addEventListener('click',()=>{
-                const section = btn.closest('.space-y-3').querySelector('.comments-section');
-                section.classList.toggle('hidden');
-            });
-        });
-
-        document.querySelectorAll('.view-all-comments-btn').forEach(btn=>{
-            btn.addEventListener('click',()=>{
-                const list = btn.closest('.space-y-3').querySelector('.comments-section > div');
-                list.classList.toggle('max-h-36');
-                btn.textContent = btn.textContent==='View all comments'?'Hide comments':'View all comments';
-            });
-        });
-    </script>
-
-    {{-- layouts/app.blade.php — keep this single flash block (remove duplicates from views) --}}
-<div class="max-w-3xl mx-auto px-4 mt-6 space-y-4">
-    @if(session('status'))
-        <div class="p-3 rounded-md bg-green-800 text-green-100">
-            {{ session('status') }}
-        </div>
-    @endif
-
-    @if($errors->any())
-        <div class="p-3 rounded-md bg-red-800 text-red-100">
-            <strong class="block font-semibold mb-1">There were some problems:</strong>
-            <ul class="list-disc list-inside text-sm space-y-1">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-</div>
-
-
+    {{-- Page-specific AJAX scripts --}}
     @stack('scripts')
+
 </body>
 </html>

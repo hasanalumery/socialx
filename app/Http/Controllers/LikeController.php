@@ -14,34 +14,39 @@ class LikeController extends Controller
 
     /**
      * Toggle like/unlike on a post.
-     * Returns JSON if the request is AJAX.
+     * Supports both full-page and AJAX workflows.
      */
     public function toggle(Request $request, Post $post)
     {
         $user = $request->user();
 
-        // Check if user already liked the post
-        $existing = $post->likes()->where('user_id', $user->id)->first();
+        // Determine if like already exists
+        $existing = $post->likes()
+            ->where('user_id', $user->id)
+            ->first();
 
         if ($existing) {
             $existing->delete();
             $status = 'unliked';
         } else {
-            $post->likes()->create(['user_id' => $user->id]);
+            $post->likes()->create([
+                'user_id' => $user->id
+            ]);
             $status = 'liked';
         }
 
+        // Recalculate aggregated like count
         $likesCount = $post->likes()->count();
 
-        // Return JSON for AJAX requests
+        // Serve AJAX-specific response
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
-                'status' => $status,
+                'status'      => $status,
                 'likes_count' => $likesCount,
             ]);
         }
 
-        // Fallback for normal requests
+        // Standard redirect fallback
         return back();
     }
 }

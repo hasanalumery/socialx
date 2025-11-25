@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany};
-
 use App\Models\User;
 use App\Models\Like;
 use App\Models\Comment;
@@ -15,11 +14,7 @@ class Post extends Model
     use HasFactory;
 
     /**
-     * Attributes that are mass assignable.
-     *
-     * Keep this explicit to avoid mass-assignment vulnerabilities.
-     *
-     * @var array<int,string>
+     * Mass assignable attributes
      */
     protected $fillable = [
         'content',
@@ -27,9 +22,7 @@ class Post extends Model
     ];
 
     /**
-     * Casts for date handling.
-     *
-     * @var array<string,string>
+     * Cast timestamps
      */
     protected $casts = [
         'created_at' => 'datetime',
@@ -37,7 +30,7 @@ class Post extends Model
     ];
 
     /**
-     * Post owner.
+     * Relationship: Post belongs to a user
      */
     public function user(): BelongsTo
     {
@@ -45,7 +38,7 @@ class Post extends Model
     }
 
     /**
-     * Likes on this post.
+     * Relationship: Post has many likes
      */
     public function likes(): HasMany
     {
@@ -53,30 +46,39 @@ class Post extends Model
     }
 
     /**
-     * Comments on this post.
+     * Relationship: Post has many comments (newest first)
      */
     public function comments(): HasMany
     {
-        return $this->hasMany(Comment::class);
+        return $this->hasMany(Comment::class)->latest();
     }
 
     /**
-     * Check if this post is liked by the given user id.
-     *
-     * Uses the loaded relationship if present to avoid extra queries,
-     * otherwise falls back to an efficient existence check.
+     * Check if this post is liked by a given user or user ID
+     * Accepts: User model, numeric ID, or null
      */
-    public function isLikedBy(int $userId): bool
+    public function isLikedBy($user): bool
     {
-        if ($this->relationLoaded('likes')) {
-            return $this->likes->contains('user_id', $userId);
-        }
+        if (!$user) return false; // Not logged in
+
+        $userId = $user instanceof User ? $user->id : $user;
 
         return $this->likes()->where('user_id', $userId)->exists();
     }
 
     /**
-     * Toggle like for a user. Returns true if liked, false if unliked.
+     * Efficient check if post is liked by user ID when likes are loaded
+     */
+    public function isLikedByUser(int $userId): bool
+    {
+        return $this->relationLoaded('likes')
+            ? $this->likes->contains('user_id', $userId)
+            : $this->likes()->where('user_id', $userId)->exists();
+    }
+
+    /**
+     * Toggle like for a user
+     * Returns: true = liked, false = unliked
      */
     public function toggleLikeBy(User $user): bool
     {
@@ -88,11 +90,7 @@ class Post extends Model
         }
 
         $this->likes()->create(['user_id' => $user->id]);
+
         return true;
     }
-
-    public function isLikedByUser($userId)
-{
-    return $this->likes->contains('user_id', $userId);
-}
 }
