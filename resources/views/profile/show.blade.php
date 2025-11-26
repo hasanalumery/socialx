@@ -3,7 +3,7 @@
 @section('title', ($user->name ?? 'Profile') . ' — SocialX')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6 max-w-3xl mx-auto">
 
     {{-- Profile header --}}
     <div class="bg-gray-900 rounded-2xl p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
@@ -39,7 +39,7 @@
                         <form method="POST" action="{{ route('unfollow', $user) }}">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="px-4 py-2 rounded-full bg-gray-600 hover:bg-gray-700 text-white w-full md:w-auto transition">Unfollow</button>
+                            <button type="submit" class="px-4 py-2 rounded-full bg-gray-700 hover:bg-gray-600 text-white w-full md:w-auto transition">Unfollow</button>
                         </form>
                     @else
                         <form method="POST" action="{{ route('follow', $user) }}">
@@ -54,9 +54,9 @@
         </div>
     </div>
 
-    {{-- Posts feed (Twitter style: single column) --}}
+    {{-- Posts feed: Twitter-style, vertical --}}
     <div class="flex flex-col gap-4">
-        @foreach($posts as $post)
+        @forelse($posts as $post)
             @php
                 $media = $post->media ?? null;
                 $isVideo = false;
@@ -67,6 +67,7 @@
             @endphp
 
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-col gap-3 shadow-sm hover:shadow-md transition">
+                {{-- Post header --}}
                 <div class="flex items-center gap-3">
                     @if($post->user->profile_picture)
                         <img src="{{ asset('storage/' . $post->user->profile_picture) }}" alt="{{ $post->user->name }}" class="w-10 h-10 rounded-full object-cover border border-gray-700">
@@ -106,7 +107,9 @@
                     <span>{{ $post->comments()->count() ?? 0 }} 💬</span>
                 </div>
             </div>
-        @endforeach
+        @empty
+            <p class="text-gray-400 text-center">This user hasn't posted yet.</p>
+        @endforelse
     </div>
 
     {{-- Pagination --}}
@@ -115,6 +118,5 @@
             {{ $posts->links('pagination::tailwind') }}
         </div>
     @endif
-
 </div>
 @endsection
