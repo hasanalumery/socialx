@@ -3,26 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class FollowController extends Controller
 {
     public function follow(User $user)
     {
-        $me = auth()->user();
+        $me = Auth::user();
 
+        // Prevent following yourself
         if ($me->id === $user->id) {
-            return response()->json(['error' => 'You cannot follow yourself'], 400);
+            return back()->with('error', 'You cannot follow yourself.');
         }
 
-        $me->following()->syncWithoutDetaching([$user->id]);
+        // Check if already following (correct column: following_id)
+        if (!$me->following()->where('following_id', $user->id)->exists()) {
+            $me->following()->attach($user->id);  // attaches as following_id
+        }
 
-        return response()->json(['status' => 'followed']);
+        return back();
     }
 
     public function unfollow(User $user)
     {
-        auth()->user()->following()->detach($user->id);
+        $me = Auth::user();
 
-        return response()->json(['status' => 'unfollowed']);
+        // Detach the relationship via following_id
+        $me->following()->detach($user->id);
+
+        return back();
     }
 }

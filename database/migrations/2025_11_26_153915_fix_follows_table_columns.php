@@ -10,22 +10,24 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-    Schema::create('follows', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('follower_id')->constrained('users')->onDelete('cascade');
-    $table->foreignId('following_id')->constrained('users')->onDelete('cascade');
-    $table->timestamps();
-});
+{
+    Schema::table('follows', function (Blueprint $table) {
+        if (Schema::hasColumn('follows', 'user_id')) {
+            $table->renameColumn('user_id', 'following_id');
+        }
 
-    
-    }
+        if (Schema::hasColumn('follows', 'followed_id')) {
+            $table->renameColumn('followed_id', 'following_id');
+        }
+    });
+}
+
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('follows');
+        //
     }
 };

@@ -10,9 +10,6 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     */
     protected $fillable = [
         'name',
         'email',
@@ -21,56 +18,38 @@ class User extends Authenticatable
         'bio',
     ];
 
-    /**
-     * The attributes that should be hidden for arrays.
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
 
-    /**
-     * One-to-one relationship with Profile.
-     */
     public function profile()
     {
         return $this->hasOne(Profile::class);
     }
 
-    /**
-     * One-to-many relationship with Like.
-     */
     public function likes()
     {
         return $this->hasMany(Like::class);
     }
 
-    /**
-     * One-to-many relationship with Post.
-     */
     public function posts()
     {
         return $this->hasMany(Post::class);
     }
 
-    /**
-     * One-to-many relationship with Comment.
-     */
     public function comments()
     {
         return $this->hasMany(Comment::class);
     }
 
     /**
-     * Users that this user is following.
+     * Users this user is following.
      */
     public function following()
     {
@@ -83,7 +62,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Users that follow this user.
+     * Users following this user.
      */
     public function followers()
     {

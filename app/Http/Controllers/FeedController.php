@@ -20,7 +20,7 @@ class FeedController extends Controller
             // Get IDs of users the current user follows
             $followedIds = DB::table('follows')
                              ->where('follower_id', $userId)
-                             ->pluck('followed_id')
+                             ->pluck('following_id')
                              ->toArray();
 
             if (!empty($followedIds)) {

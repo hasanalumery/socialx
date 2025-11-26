@@ -7,12 +7,13 @@ use App\Http\Controllers\{
     ProfileController,
     LikeController,
     FollowController,
-    CommentController
+    CommentController,
+    ExploreController,
 };
 
 // Public pages
 Route::get('/', [FeedController::class, 'index'])->name('home');
-Route::get('/explore', [FeedController::class, 'explore'])->name('explore');
+Route::get('/explore', [ExploreController::class, 'index'])->name('explore'); // points to ExploreController
 
 // Auth routes (Laravel Breeze)
 require __DIR__ . '/auth.php';
@@ -38,7 +39,7 @@ Route::middleware('auth')->group(function () {
     // Post like/unlike (AJAX)
     Route::post('/posts/{post}/like', [LikeController::class, 'toggle'])->name('post.like');
 
-    // Comment store (AJAX) — note the correct '/comments' plural
+    // Comment store (AJAX)
     Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comment.store');
 
     // Comment like/unlike (AJAX)
@@ -47,6 +48,11 @@ Route::middleware('auth')->group(function () {
     // Follows
     Route::post('/users/{user}/follow', [FollowController::class, 'follow'])->name('user.follow');
     Route::delete('/users/{user}/follow', [FollowController::class, 'unfollow'])->name('user.unfollow');
+
+    // Short follow/unfollow routes
+    Route::post('/follow/{user}', [FollowController::class, 'follow'])->name('follow');
+    Route::delete('/follow/{user}', [FollowController::class, 'unfollow'])->name('unfollow');
+
 });
 
 // Public profile
