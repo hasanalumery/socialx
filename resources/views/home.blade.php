@@ -57,16 +57,23 @@
 
         {{-- Media --}}
         @if($post->media)
-            @php $ext = pathinfo($post->media, PATHINFO_EXTENSION); @endphp
-            @if(in_array(strtolower($ext), ['mp4','webm']))
-                <video controls class="mt-2 max-h-80 w-full rounded-md bg-black">
-                    <source src="{{ asset('storage/' . $post->media) }}" type="video/{{ $ext }}">
-                    Your browser does not support the video tag.
-                </video>
-            @else
-                <img src="{{ asset('storage/' . $post->media) }}" class="rounded-2xl max-h-80 w-full object-cover mt-2">
-            @endif
-        @endif
+    @php $ext = pathinfo($post->media, PATHINFO_EXTENSION); @endphp
+    @if(in_array(strtolower($ext), ['mp4','webm']))
+        <div class="post-media-wrapper mt-2 w-full rounded-2xl overflow-hidden bg-black shadow-md">
+            <video controls class="w-full h-auto max-h-60 object-contain">
+                <source src="{{ asset('storage/' . $post->media) }}" type="video/{{ $ext }}">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    @else
+        <div class="post-media-wrapper mt-2 w-full rounded-2xl overflow-hidden bg-gray-900 shadow-md">
+            <img src="{{ asset('storage/' . $post->media) }}" 
+                 alt="Post media"
+                 class="w-full h-auto object-contain p-1 rounded-lg transition duration-200 ease-in-out
+                        filter brightness-105 contrast-105 saturate-105 hover:brightness-110 hover:contrast-110 hover:saturate-110">
+        </div>
+    @endif
+@endif
 
         {{-- Actions --}}
         <div class="flex items-center gap-3 mt-2">
@@ -75,7 +82,7 @@
                     class="like-btn flex items-center gap-1 px-3 py-1 rounded-full bg-gray-700 hover:bg-gray-600 transition"
                     aria-pressed="{{ $post->isLikedBy(auth()->user()) ? 'true' : 'false' }}">
                 <span class="like-text">{{ $post->isLikedBy(auth()->user()) ? '❤️' : '🤍' }}</span>
-                <span class="likes-count text-sm text-gray-300">({{ $post->likes->count() }})</span>
+                <span class="likes-count text-sm text-gray-300">{{ $post->likes->count() }}</span>
             </button>
             @else
             <span class="text-sm text-gray-500">{{ $post->likes->count() }} likes</span>
@@ -83,7 +90,7 @@
 
             <button type="button"
                     class="comment-toggle-btn flex items-center gap-1 px-3 py-1 rounded-full bg-gray-700 hover:bg-gray-600 transition">
-                Comments ({{ $post->comments->count() }})
+                Comments {{ $post->comments->count() }}
             </button>
         </div>
 

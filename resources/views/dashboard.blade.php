@@ -5,7 +5,7 @@
 @section('content')
 <div class="bg-gray-800 p-6 rounded-2xl shadow space-y-4">
 
-    <h2 class="text-2xl font-bold text-white">You're logged in ✨</h2>
+    <h2 class="text-2xl font-bold text-white">You're logged in </h2>
 
     <p class="text-gray-400">Welcome back! Choose where you want to go:</p>
 
