@@ -5,33 +5,29 @@
 @section('content')
 <div class="max-w-4xl mx-auto space-y-6 px-4 sm:px-6 lg:px-8">
 
-        {{-- Create Post --}}
-@auth
-<div class="bg-gray-800 rounded-2xl pt-2 pb-8 px-6 shadow-lg transition hover:shadow-xl">
-    <form method="POST" action="{{ route('posts.store') }}" enctype="multipart/form-data" class="space-y-3">
-        @csrf
-        <textarea name="content" rows="3"
-                  class="w-full bg-gray-900 border border-gray-700 rounded-2xl p-3 resize-none text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="What's on your mind?">{{ old('content') }}</textarea>
+    {{-- Create Post --}}
+    @auth
+    <div class="bg-gray-800 rounded-2xl pt-2 pb-8 px-6 shadow-lg transition hover:shadow-xl">
+        <form method="POST" action="{{ route('posts.store') }}" enctype="multipart/form-data" class="space-y-3">
+            @csrf
+            <textarea name="content" rows="3"
+                      class="w-full bg-gray-900 border border-gray-700 rounded-2xl p-3 resize-none text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="What's on your mind?">{{ old('content') }}</textarea>
+            @error('content')
+            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+            @enderror
 
-        @error('content')
-        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-        @enderror
-
-        <div class="flex justify-between items-center mt-1">
-            <label class="cursor-pointer text-blue-400 hover:text-blue-300 flex items-center gap-2">
-                📷 Add media
-                <input type="file" name="media" class="hidden" accept="image/*,video/*">
-            </label>
-
-            <button type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-2xl font-semibold text-sm transition">Post</button>
-        </div>
-    </form>
-</div>
-@endauth
-
-
+            <div class="flex justify-between items-center mt-1">
+                <label class="cursor-pointer text-blue-400 hover:text-blue-300 flex items-center gap-2">
+                    📷 Add media
+                    <input type="file" name="media" class="hidden" accept="image/*,video/*">
+                </label>
+                <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-2xl font-semibold text-sm transition">Post</button>
+            </div>
+        </form>
+    </div>
+    @endauth
 
     {{-- Posts Feed --}}
     @forelse ($posts as $post)
@@ -41,7 +37,7 @@
         <div class="flex items-center gap-3">
             <a href="{{ route('profile.show', $post->user->id) }}" class="flex items-center gap-3">
                 @if($post->user->profile_picture)
-                    <img src="{{ asset('storage/'.$post->user->profile_picture) }}" class="w-12 h-12 rounded-full object-cover">
+                    <img src="{{ asset($post->user->profile_picture) }}" class="w-12 h-12 rounded-full object-cover">
                 @else
                     <div class="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white font-semibold">
                         {{ strtoupper(substr($post->user?->name ?? 'U', 0, 1)) }}
@@ -55,21 +51,21 @@
         </div>
 
         {{-- Content --}}
-        <div class="text-gray-200 text-sm sm:text-base leading-relaxed">{{ $post->content }}</div>
+        <div class="text-gray-200 text-sm sm:text-base leading-relaxed break-words">{{ $post->content }}</div>
 
         {{-- Media --}}
         @if($post->media)
             @php $ext = pathinfo($post->media, PATHINFO_EXTENSION); @endphp
             @if(in_array(strtolower($ext), ['mp4','webm']))
                 <div class="post-media-wrapper mt-3 w-full rounded-2xl overflow-hidden bg-black shadow-md">
-                    <video controls class="w-full h-auto max-h-72 object-contain">
-                        <source src="{{ asset('storage/' . $post->media) }}" type="video/{{ $ext }}">
+                    <video controls class="w-full h-auto max-h-[50vh] sm:max-h-72 object-contain">
+                        <source src="{{ asset($post->media) }}" type="video/{{ $ext }}">
                         Your browser does not support the video tag.
                     </video>
                 </div>
             @else
                 <div class="post-media-wrapper mt-3 w-full rounded-2xl overflow-hidden bg-gray-900 shadow-md">
-                    <img src="{{ asset('storage/' . $post->media) }}" 
+                    <img src="{{ asset($post->media) }}" 
                          alt="Post media"
                          class="w-full h-auto object-contain p-1 rounded-lg transition duration-200 ease-in-out
                                 filter brightness-105 contrast-105 saturate-105 hover:brightness-110 hover:contrast-110 hover:saturate-110">
@@ -99,7 +95,7 @@
         {{-- Comments Section --}}
         <div class="comments-section mt-2 hidden space-y-2">
             @foreach($post->comments as $comment)
-            <div class="bg-gray-700 rounded-full px-3 py-1 text-sm text-gray-100 flex items-center justify-between">
+            <div class="comment-item bg-gray-700 rounded-full px-3 py-1 text-sm text-gray-100 flex items-center justify-between">
                 <span>
                     <span class="font-semibold">{{ $comment->user?->name ?? 'Unknown' }}</span>: {{ $comment->body }}
                 </span>
@@ -176,13 +172,16 @@ document.addEventListener('DOMContentLoaded', () => {
         likeBtn.disabled = true;
 
         try {
-            const res = await fetch(`/posts/${postId}/like`, { method:'POST', headers:{ 'X-CSRF-TOKEN': token, 'Accept':'application/json' } });
+            const res = await fetch(`/posts/${postId}/like`, {
+                method:'POST',
+                headers:{ 'X-CSRF-TOKEN': token, 'Accept':'application/json' }
+            });
             const data = await res.json();
             const text = likeBtn.querySelector('.like-text');
             const count = likeBtn.querySelector('.likes-count');
             text.textContent = data.status === 'liked' ? '❤️' : '🤍';
+            count.textContent = data.likes_count;
             likeBtn.setAttribute('aria-pressed', data.status === 'liked' ? 'true' : 'false');
-            count.textContent = `(${data.likes_count})`;
         } catch(err){ console.error(err); }
         finally{ likeBtn.disabled = false; }
     });
@@ -222,14 +221,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
             if(data && data.comment){
                 const newComment = document.createElement('div');
-                newComment.className = 'bg-gray-700 rounded-full px-3 py-1 text-sm text-gray-100 flex items-center justify-between';
+                newComment.className = 'comment-item bg-gray-700 rounded-full px-3 py-1 text-sm text-gray-100 flex items-center justify-between';
                 newComment.innerHTML = `<span><span class="font-semibold">${data.comment.user_name}</span>: ${data.comment.body}</span>
                                         <button class="comment-like-btn ml-2 text-sm text-gray-300" data-comment-id="${data.comment.id}">🤍 (0)</button>`;
                 form.closest('.comments-section').insertBefore(newComment, form);
                 input.value = '';
 
                 const toggleBtn = postCard.querySelector('.comment-toggle-btn');
-                const count = postCard.querySelectorAll('.comments-section > div').length;
+                const count = postCard.querySelectorAll('.comments-section > .comment-item').length;
                 toggleBtn.textContent = `Comments (${count})`;
             } else location.reload();
         } catch(err){ console.error(err); }
